@@ -3,6 +3,7 @@ import pygame
 import game.settings as settings
 import game.player as player
 import game.camera as camera
+import game.goal as goal
 
 def start():
     """起動時に実行される関数"""
@@ -26,7 +27,14 @@ def start():
     center_pos = (screen_width/2,screen_height/2)
     ground_y = screen_height - settings.GROUND_Y 
 
-
+    # 盤面オブジェクト初期設定
+    main_goal = goal.Goal(
+        settings.GOAL_X,
+        settings.GOAL_Y,
+        settings.GOAL_COLOR,
+        settings.GOAL_WIDTH,
+        settings.GOAL_HEIGHT
+    )
 
     # 操作キャラ初期設定
     main_player = player.Player(
@@ -55,7 +63,8 @@ def start():
                     running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
-                        state = "reset"
+                        main_camera,state,main_goal,main_player = reset_all(main_camera,state,main_goal,main_player)
+
 
             # 操作受付    
             keys = pygame.key.get_pressed()
@@ -65,19 +74,35 @@ def start():
                 main_player.y = 0
             elif keys[pygame.K_d]:
                 main_camera.move_x(5)
+                main_player.move_x(5)
             elif keys[pygame.K_a]:
                 main_camera.move_x(-5)
+                main_player.move_x(-5)
+            elif keys[pygame.K_b]:
+                print(main_player.x,main_player.y)
 
-            #主人公に関する処理
+            # 主人公に関する処理
+            # 足場判定
             if ground_y > main_player.y + main_player.radius:
                 main_player.on_ground = False
             else:
                 main_player.on_ground = True
             main_player.fall()
 
+            # 照準設定
+            
+
             
             # オブジェクト描画
             main_player.draw(screen,main_camera.x,main_camera.y,center_pos)
+            main_goal.draw(screen,main_camera.x,main_camera.y)
+
+            # ゴール判定
+            if main_goal.is_touch_object(main_player.x,main_player.y):
+                state = "goal"
+                goal_event(screen)
+
+            
 
             # 画面更新
             pygame.display.flip()
@@ -89,11 +114,57 @@ def start():
                 # ウィンドウの終了
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.KEYDOWN:
+                    if state in {"gameover","goal"}:
+                        if event.key == pygame.K_r:
+                            main_camera,state,main_goal,main_player = reset_all(main_camera,state,main_goal,main_player)
+                            
 
          
     
     pygame.quit()
     
+def goal_event(screen):
+    """ゴール時の演出"""
+    font = pygame.font.Font(None, settings.CLEAR_FONT_SIZE)
+    text = font.render("GAME CLEAR", True, settings.CLEAR_FONT_COLOR)
+    text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+
+    screen.blit(text, text_rect)
+
+def reset_all(main_camera,state,main_goal,main_player):
+    """全てリセットし初期設定に戻す関数"""
+    # カメラ初期設定
+    main_camera = camera.Camera(
+        settings.CAMERA_FIRST_X,
+        settings.CAMERA_FIRST_Y
+    )
+
+    # 盤面初期設定
+    state = "playing"
+
+    # 盤面オブジェクト初期設定
+    main_goal = goal.Goal(
+        settings.GOAL_X,
+        settings.GOAL_Y,
+        settings.GOAL_COLOR,
+        settings.GOAL_WIDTH,
+        settings.GOAL_HEIGHT
+    )
+
+    # 操作キャラ初期設定
+    main_player = player.Player(
+        settings.PLAYER_COLOR,
+        settings.PLAYER_FIRST_X,
+        settings.PLAYER_FIRST_Y,
+        settings.G,
+        0,
+        False,
+        settings.PLAYER_RADIUS
+    )
+    main_player.reset_fall()
+
+    return main_camera,state,main_goal,main_player
 
 
 if __name__ == "__main__":

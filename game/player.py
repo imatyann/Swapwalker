@@ -26,3 +26,10 @@ class Player:
     def reset_fall(self):
         """重力加速度をリセットする関数"""
         self.fall_speed = 5
+
+    def move_x(self,value):
+        """主人公を水平方向に動かす関数"""
+        self.x += value
+    def move_y(self,value):
+        """主人公を鉛直方向に動かす関数"""
+        self.y += value
