@@ -69,7 +69,7 @@ def start():
                 main_camera.move_x(-5)
 
             #主人公に関する処理
-            if ground_y > main_player.y:
+            if ground_y > main_player.y + main_player.radius:
                 main_player.on_ground = False
             else:
                 main_player.on_ground = True

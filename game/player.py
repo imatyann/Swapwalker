@@ -13,9 +13,9 @@ class Player:
 
     def draw(self,screen,camera_x,camera_y,center_pos):
         """主人公を描画する関数"""
-        world_y = self.y - camera_y 
-        world_x = self.x - camera_x
-        pygame.draw.circle(screen,self.color,(center_pos[0],world_y),self.radius)
+        window_y = self.y - camera_y
+        window_x = self.x - camera_x
+        pygame.draw.circle(screen,self.color,(center_pos[0],window_y),self.radius)
 
     def fall(self):
         """重力を実装する関数"""
