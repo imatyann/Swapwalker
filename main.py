@@ -16,37 +16,12 @@ def start():
     pygame.display.set_caption("スワップウォーカー")
     clock = pygame.time.Clock()
 
-    # カメラ初期設定
-    main_camera = camera.Camera(
-        settings.CAMERA_FIRST_X,
-        settings.CAMERA_FIRST_Y
-    )
-
     # 盤面初期設定
     state = "playing"
     center_pos = (screen_width/2,screen_height/2)
     ground_y = screen_height - settings.GROUND_Y 
 
-    # 盤面オブジェクト初期設定
-    main_goal = goal.Goal(
-        settings.GOAL_X,
-        settings.GOAL_Y,
-        settings.GOAL_COLOR,
-        settings.GOAL_WIDTH,
-        settings.GOAL_HEIGHT
-    )
-
-    # 操作キャラ初期設定
-    main_player = player.Player(
-        settings.PLAYER_COLOR,
-        settings.PLAYER_FIRST_X,
-        settings.PLAYER_FIRST_Y,
-        settings.G,
-        0,
-        False,
-        settings.PLAYER_RADIUS
-    )
-    main_player.reset_fall()
+    main_camera,state,main_goal,main_player = reset_all()
 
     running = True
     while running:
@@ -63,7 +38,7 @@ def start():
                     running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
-                        main_camera,state,main_goal,main_player = reset_all(main_camera,state,main_goal,main_player)
+                        main_camera,state,main_goal,main_player = reset_all()
 
 
             # 操作受付    
@@ -90,7 +65,7 @@ def start():
             main_player.fall()
 
             # 照準設定
-            
+
 
             
             # オブジェクト描画
@@ -117,7 +92,7 @@ def start():
                 elif event.type == pygame.KEYDOWN:
                     if state in {"gameover","goal"}:
                         if event.key == pygame.K_r:
-                            main_camera,state,main_goal,main_player = reset_all(main_camera,state,main_goal,main_player)
+                            main_camera,state,main_goal,main_player = reset_all()
                             
 
          
@@ -132,7 +107,7 @@ def goal_event(screen):
 
     screen.blit(text, text_rect)
 
-def reset_all(main_camera,state,main_goal,main_player):
+def reset_all():
     """全てリセットし初期設定に戻す関数"""
     # カメラ初期設定
     main_camera = camera.Camera(
