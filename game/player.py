@@ -1,17 +1,21 @@
 import pygame
 
 class Player:
-    def __init__(self,color,y,g,fall_speed,on_ground):
+    def __init__(self,color,x,y,g,fall_speed,on_ground,radius):
         self.color = color
+        self.x = x
         self.y = y
         self.fall_speed = fall_speed
         self.g = g
         self.on_ground = on_ground
+        self.radius = radius
 
 
     def draw(self,screen,camera_x,camera_y,center_pos):
         """主人公を描画する関数"""
-        pygame.draw.circle(screen,(0,0,0),(center_pos[0],self.y),10)
+        world_y = self.y - camera_y 
+        world_x = self.x - camera_x
+        pygame.draw.circle(screen,self.color,(center_pos[0],world_y),self.radius)
 
     def fall(self):
         """重力を実装する関数"""
