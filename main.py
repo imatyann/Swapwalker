@@ -1,10 +1,12 @@
 import pygame
+import math
 
 import game.settings as settings
 import game.player as player
 import game.camera as camera
 import game.goal as goal
 import game.reticle as reticle
+import game.bullet as bullet
 
 def start():
     """起動時に実行される関数"""
@@ -22,7 +24,7 @@ def start():
     center_pos = (screen_width/2,screen_height/2)
     ground_y = screen_height - settings.GROUND_Y 
 
-    main_camera,state,main_goal,main_player,main_reticle = reset_all()
+    main_camera,state,main_goal,main_player,main_reticle,main_bullet = reset_all()
 
     running = True
     while running:
@@ -39,7 +41,13 @@ def start():
                     running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
-                        main_camera,state,main_goal,main_player,main_reticle = reset_all()
+                        main_camera,state,main_goal,main_player,main_reticle,main_bullet = reset_all()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        if main_bullet.is_alive == False:
+                            main_bullet.is_alive = True
+                            main_bullet.summon((main_player.x,main_player.y))
+
 
 
             # 操作受付    
@@ -67,8 +75,21 @@ def start():
 
             # 照準設定 
             mouse_pos = pygame.mouse.get_pos()
-            dx, dy = mouse_pos[0] - main_player.x, mouse_pos[1] - main_player.y 
-            half_line_pos = (1000 * dx + main_player.x, 1000 * dy + main_player.y)
+            dx, dy = mouse_pos[0] - main_player.x, mouse_pos[1] - main_player.y
+            length = math.sqrt(dx**2 + dy**2)
+            if length != 0:
+                dx /= length
+                dy /= length
+            half_line_pos = (500 * dx + main_player.x, 500 * dy + main_player.y)
+
+            # 弾の設定
+            if main_bullet.is_alive == True:
+                main_bullet.draw(screen)
+                main_bullet.plus_xy(dx,dy)                
+                if main_bullet.is_out_screen(screen_width,screen_height):
+                    main_bullet.is_alive = False
+                    print("aaaa")
+
 
             # オブジェクト描画
             main_reticle.draw(screen,(main_player.x,main_player.y),half_line_pos)
@@ -97,13 +118,13 @@ def start():
                 elif event.type == pygame.KEYDOWN:
                     if state in {"gameover","goal"}:
                         if event.key == pygame.K_r:
-                            main_camera,state,main_goal,main_player,main_reticle = reset_all()
+                            main_camera,state,main_goal,main_player,main_reticle,main_bullet = reset_all()
                             
 
          
     
     pygame.quit()
-    
+
 def goal_event(screen):
     """ゴール時の演出"""
     font = pygame.font.Font(None, settings.CLEAR_FONT_SIZE)
@@ -146,11 +167,22 @@ def reset_all():
 
     # レティクル初期設定
     main_reticle = reticle.Reticle(
-        1,
-        (0,0,0)
+        settings.RETICLE_WIDTH,
+        settings.RETICLE_COLOR
     )
 
-    return main_camera,state,main_goal,main_player,main_reticle
+    # 弾の初期設定
+    main_bullet = bullet.Bullet(
+        settings.BULLET_COLOR,
+        settings.BULLET_RADIUS,
+        settings.BULLET_SPEED,
+        0,
+        0,
+        False
+    )
+
+    return main_camera,state,main_goal,main_player,main_reticle,main_bullet
+
 
 
 if __name__ == "__main__":
