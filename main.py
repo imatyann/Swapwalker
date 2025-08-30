@@ -4,6 +4,7 @@ import game.settings as settings
 import game.player as player
 import game.camera as camera
 import game.goal as goal
+import game.reticle as reticle
 
 def start():
     """起動時に実行される関数"""
@@ -21,7 +22,7 @@ def start():
     center_pos = (screen_width/2,screen_height/2)
     ground_y = screen_height - settings.GROUND_Y 
 
-    main_camera,state,main_goal,main_player = reset_all()
+    main_camera,state,main_goal,main_player,main_reticle = reset_all()
 
     running = True
     while running:
@@ -38,7 +39,7 @@ def start():
                     running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
-                        main_camera,state,main_goal,main_player = reset_all()
+                        main_camera,state,main_goal,main_player,main_reticle = reset_all()
 
 
             # 操作受付    
@@ -64,13 +65,17 @@ def start():
                 main_player.on_ground = True
             main_player.fall()
 
-            # 照準設定
+            # 照準設定 
+            mouse_pos = pygame.mouse.get_pos()
+            dx, dy = mouse_pos[0] - main_player.x, mouse_pos[1] - main_player.y 
+            half_line_pos = (1000 * dx + main_player.x, 1000 * dy + main_player.y)
 
-
-            
             # オブジェクト描画
+            main_reticle.draw(screen,(main_player.x,main_player.y),half_line_pos)
             main_player.draw(screen,main_camera.x,main_camera.y,center_pos)
             main_goal.draw(screen,main_camera.x,main_camera.y)
+
+        
 
             # ゴール判定
             if main_goal.is_touch_object(main_player.x,main_player.y):
@@ -92,7 +97,7 @@ def start():
                 elif event.type == pygame.KEYDOWN:
                     if state in {"gameover","goal"}:
                         if event.key == pygame.K_r:
-                            main_camera,state,main_goal,main_player = reset_all()
+                            main_camera,state,main_goal,main_player,main_reticle = reset_all()
                             
 
          
@@ -139,7 +144,13 @@ def reset_all():
     )
     main_player.reset_fall()
 
-    return main_camera,state,main_goal,main_player
+    # レティクル初期設定
+    main_reticle = reticle.Reticle(
+        1,
+        (0,0,0)
+    )
+
+    return main_camera,state,main_goal,main_player,main_reticle
 
 
 if __name__ == "__main__":
